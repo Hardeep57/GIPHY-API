@@ -17,7 +17,7 @@ function onLoadFun()
 
 function callApi(cat)
 {
-var gifUri='http://api.giphy.com/v1/gifs/search?q='+cat+'&api_key=dc6zaTOxFJmzC';
+var gifUri='https://api.giphy.com/v1/gifs/search?q='+cat+'&api_key=dc6zaTOxFJmzC';
 $( "#result" ).html( 'Loading...' );
 console.log(gifUri);
 $.get( gifUri, function( res ) {
