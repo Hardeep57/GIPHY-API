@@ -1,42 +1,104 @@
-var listOfGifs= ['cat','funny'];
+
+var topics = ["toffe", "html", "node", "taco-bell", "soccer",
+	"Accord", "Maxican"];
+var input = "";
+var queryURL = "https://api.giphy.com/v1/gifs/search?q=" + input + "&limit=10&sort=relevent&&api_key=dc6zaTOxFJmzC";
+var APIKey ="dc6zaTOxFJmzC";
 
 
-function onLoadFun()
-{
-	for(l in listOfGifs )
-	{
-		console.log(listOfGifs[l]);
+// Function to loop through the array of topics and create buttons for each
+function renderButtons() {
 
-		var button ='<button class="callgifapi" onclick="callApi(\''+listOfGifs[l]+'\')">'+listOfGifs[l]+'</button>';
-		$('#catList').append(button);
+	$("#buttons-view").empty();
+
+	// Iterate through the topics array and assign each to a new button
+	for (var i = 0; i < topics.length; i++) {
+		  var newTopic = $("<button>");
+		  newTopic.addClass("topicSearch");
+		  newTopic.attr("topic-name", topics[i]);
+		  newTopic.text(topics[i]);
+		  $("#buttons-view").append(newTopic);
 	}
-		
+
+	// On-click function to reset the input field after clicking the submit button
+	$(".Topic-form").on("click", function() {
+		this.reset();
+	})
 }
 
 
+// Function to pull search results (JSON) from giphy and append images
+function displayGiphy() {
 
-function callApi(cat)
-{
-var gifUri='https://api.giphy.com/v1/gifs/search?q='+cat+'&api_key=dc6zaTOxFJmzC';
-$( "#result" ).html( 'Loading...' );
-console.log(gifUri);
-$.get( gifUri, function( res ) {
-	console.log(res);
+	// $("#giphy").empty();
+	input = $(this).attr("topic-name");
+	queryURL = "https://api.giphy.com/v1/gifs/search?q=" + input + "&limit=10&api_key=dc6zaTOxFJmzC";
+	console.log(input);
+	$.ajax ({
+		url: queryURL,
+		method: "GET"
+	}).done(function(response) {
+
+		for(x = 0; x < 10; x++) {
+
+			// Pulls and displays data from the "rating" object
+	        var rating = response.data[x].rating;
+	        var caption = $("<p>").text("Rating: " + rating);
+	        $("#giphy").prepend(caption);
+
+	        image = $("<img>");
+	        image.addClass("imageLayout");
+	        // image.addClass("image" + [j]);
+	        image.attr("src", response.data[x].images.original_still.url);
+	        image.attr("data-alt", response.data[x].images.original_still.url);
+	        image.attr("data-gif", response.data[x].images.original.url);
+	        image.attr("data-state", "still");
+
+	        $("#giphy").prepend(image);
+
+	        console.log(image);
 
 
-var dataset=res.data;
-	for(i in dataset )
-	{
-		console.log(dataset[i]);
-		var daSet=dataset[i];
-		var imgsrc=daSet['images']['downsized'].url;
-		console.log(imgsrc);
-		var img='<img width="150" height="150" src="'+imgsrc+'" alt="git" />';
-		var nDiv=$('div');
-		nDiv.append(img);
-		  $( "#result" ).html( nDiv );
-	}
- // $( "#result" ).html( daSet );
-  
+
+        // Creates an on-click function to start/stop animation by cycling through still and gif versions
+		       	$(".imageLayout").on("click", function() {
+		       		var moving = $(this).attr("data-state");
+
+		       		var animate = $(this).attr("data-gif");
+		       		var still = $(this).attr("data-alt");
+
+			    	// var imgSrc = $(this).attr("src");
+			    	// var imgAlt = $(this).attr("data-alt");
+			    	// var imgData = $(this).attr("data-gif");
+
+			    	if(moving === "still") {
+			    		$(this).attr("src", animate);
+			    		$(this).attr("data-state", "animate");
+			    		console.log("Turn Gif On");
+			    		// imgSrc = imgData;
+			    	}
+			    	if(moving != "still") {
+			    		$(this).attr("src", still);
+			    		$(this).attr("data-state", "still");
+			    		console.log("Turn Gif Off");
+			    	}
+				})
+		}
+	})
+}
+
+
+$("#add-topic").on("click", function(event) {
+	event.preventDefault();
+
+	var topic = $("#topic-input").val().trim();
+
+	topics.push(topic);
+
+	renderButtons();
+
 });
-}
+
+$(document).on("click", ".topicSearch", displayGiphy);
+
+renderButtons();
